@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "test": "deno test --watch",
+    "test": "deno test",
     "generate-docs": "deno doc --html ./src/option.ts ./src/option_helpers.ts"
   },
   "imports": {
