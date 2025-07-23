@@ -1,0 +1,10 @@
+{
+  "tasks": {
+    "test": "deno test --watch",
+    "generate-docs": "deno doc --html ./src/option/option.ts ./src/option/option_helpers.ts"
+  },
+  "imports": {
+    "@std/expect": "jsr:@std/expect@^1.0.16",
+    "@std/testing": "jsr:@std/testing@^1.0.15"
+  }
+}
