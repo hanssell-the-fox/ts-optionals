@@ -92,6 +92,18 @@ describe("Option", () => {
     });
   });
 
+  describe("expect", () => {
+    it("should not throw an error when called on a Some value", () => {
+      const someValue = Option.Some(10);
+      expect(() => someValue.expect("some")).not.toThrow();
+    });
+
+    it("should throw an error when called on a None value", () => {
+      const noneValue = Option.None();
+      expect(() => noneValue.expect("none")).toThrow();
+    });
+  });
+
   describe("unwrap", () => {
     it("should unwrap value and throw on second unwrap (invalidates after the fisrt access)", () => {
       const someValue = Option.Some(10);
