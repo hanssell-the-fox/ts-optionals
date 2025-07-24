@@ -52,7 +52,7 @@ describe("isOk", () => {
   });
 });
 
-describe("isNone", () => {
+describe("isErr", () => {
   it("should return true for an Err result", () => {
     expect(isErr(Err("thats an error"))).toBe(true);
   });
