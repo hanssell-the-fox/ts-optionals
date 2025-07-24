@@ -1,7 +1,8 @@
 {
   "tasks": {
-    "test": "deno test",
-    "generate-docs": "deno doc --html ./src/option.ts ./src/option_helpers.ts"
+    "dev": "deno test --fail-fast --watch",
+    "test": "deno test --fail-fast",
+    "doc": "deno doc --html ./src/option.ts ./src/option_helpers.ts ./src/result.ts ./src/result_helpers.ts"
   },
   "imports": {
     "@std/expect": "jsr:@std/expect@^1.0.16",
