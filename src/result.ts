@@ -118,6 +118,19 @@ export class Result<T, E> {
   }
 
   /**
+   * Flattens nested _Results_, returning the original `Result`.
+   *
+   * @returns {Result<T, E>} A flattened Result containg the original _Result_.
+   */
+  public get flatten(): FlattenedResult<T> {
+    const value = (this.isOk && this.#value instanceof Result)
+      ? this.#value.flatten
+      : this;
+
+    return value as unknown as FlattenedResult<T>;
+  }
+
+  /**
    * Executes a function, capturing its _output_ into an `Ok` instance of Result, or _raised_
    * errors into an `Err` instance.
    *
@@ -175,19 +188,6 @@ export class Result<T, E> {
    */
   public get isErr(): boolean {
     return this.#error;
-  }
-
-  /**
-   * Flattens nested _Results_, returning the original `Result`.
-   *
-   * @returns {Result<T, E>} A flattened Result containg the original _Result_.
-   */
-  public get flatten(): FlattenedResult<T> {
-    const value = (this.isOk && this.#value instanceof Result)
-      ? this.#value.flatten
-      : this;
-
-    return value as unknown as FlattenedResult<T>;
   }
 
   /**
