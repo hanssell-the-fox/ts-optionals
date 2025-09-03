@@ -1,6 +1,6 @@
 {
   "name": "@hans/ts-optionals",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "exports": "./mod.ts",
   "tasks": {
     "dev": "deno test --fail-fast --watch",
