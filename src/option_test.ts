@@ -1,213 +1,183 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 import { Option } from "./option.ts";
-import { none } from "./_types.ts";
 
 describe("Option", () => {
   describe("Option.Some", () => {
-    it("should return Some when given a valid (non-null, non-undefined) value", () => {
-      const someValue = Option.Some(12);
-      expect(someValue.isSome).toBe(true);
-      expect(someValue.unwrap).toBe(12);
+    it("should create an Option containing the provided value", () => {
+      const value: Option<number> = Option.Some(10);
+      expect(value.isSome).toBe(true);
+      expect(value.unwrap()).toBe(10);
     });
 
-    it("should return None when given a null or undefined", () => {
-      const nullSome = Option.Some(null);
-      expect(nullSome.isNone).toBe(true);
-      expect(nullSome.peek).toBe(none);
-      expect(() => nullSome.unwrap).toThrow();
+    it("should create an Option without value when given null or undefined", () => {
+      const nullOption: Option<never> = Option.Some(null);
+      expect(nullOption.isNone).toBe(true);
+      expect(() => nullOption.unwrap()).toThrow(ReferenceError);
 
-      const undefinedSome = Option.Some(undefined);
-      expect(undefinedSome.isNone).toBe(true);
-      expect(undefinedSome.peek).toBe(none);
-      expect(() => undefinedSome.unwrap).toThrow();
+      const undefinedOption: Option<never> = Option.Some(undefined);
+      expect(undefinedOption.isNone).toBe(true);
+      expect(() => undefinedOption.unwrap()).toThrow(ReferenceError);
     });
   });
 
   describe("Option.None", () => {
-    it("should create a None instance consistently", () => {
-      const noneValue = Option.None();
-      expect(noneValue.isNone).toBe(true);
-      expect(noneValue.peek).toBe(none);
-      expect(() => noneValue.unwrap).toThrow();
+    it("should create an Option without value", () => {
+      const none: Option<never> = Option.None();
+      expect(none.isNone).toBe(true);
+      expect(() => none.unwrap()).toThrow(ReferenceError);
     });
   });
 
   describe("from", () => {
-    it("should wrap the return value of function in Some if not null/undefined", () => {
-      const someValue = Option.from(() => 10);
-      expect(someValue.isSome).toBe(true);
-      expect(someValue.unwrap).toBe(10);
+    it("should wrap the return value of the function into an Option", () => {
+      const some: Option<number> = Option.from(() => 10);
+      expect(some.isSome).toBe(true);
+      expect(some.unwrap()).toBe(10);
     });
 
-    it("should return None if the function returns null or undefined", () => {
-      const noneValue = Option.from(() => null);
-      expect(noneValue.isNone).toBe(true);
-      expect(noneValue.peek).toBe(none);
-      expect(() => noneValue.unwrap).toThrow();
+    it("should return an Option without value if the function returns null, undefined or throws an Exception", () => {
+      const nullValueOption: Option<never> = Option.from(() => null);
+      expect(nullValueOption.isNone).toBe(true);
+      expect(() => nullValueOption.unwrap()).toThrow(ReferenceError);
+
+      const undefinedValueOption: Option<never> = Option.from(() => undefined);
+      expect(undefinedValueOption.isNone).toBe(true);
+      expect(() => undefinedValueOption.unwrap()).toThrow(ReferenceError);
+
+      // deno-fmt-ignore
+      const throwsAnErrorOption: Option<never> = Option.from(() => { throw "Some error" });
+      expect(throwsAnErrorOption.isNone).toBe(true);
+      expect(() => throwsAnErrorOption.unwrap()).toThrow(ReferenceError);
     });
   });
 
   describe("fromAsync", () => {
-    it("should wrap async result in Some if not null/undefined", async () => {
-      const someValue = await Option.fromAsync(async () =>
-        await Promise.resolve(10)
-      );
-
-      expect(someValue.isSome).toBe(true);
-      expect(someValue.unwrap).toBe(10);
+    it("should wrap the return value of the asynchronous function into an Option", async () => {
+      const some: Option<number> = await Option.fromAsync(async () => await Promise.resolve(10));
+      expect(some.isSome).toBe(true);
+      expect(some.unwrap()).toBe(10);
     });
 
-    it("should return None if async result is null or undefined", async () => {
-      const noneValue = await Option.fromAsync(async () =>
+    it("should return an Option without value if the asynchronous function returns null, undefined or throws an Exception", async () => {
+      const nullValueOption: Option<never> = await Option.fromAsync(async () =>
         await Promise.resolve(null)
       );
+      expect(nullValueOption.isNone).toBe(true);
+      expect(() => nullValueOption.unwrap()).toThrow(ReferenceError);
 
-      expect(noneValue.isNone).toBe(true);
-      expect(() => noneValue.unwrap).toThrow();
+      const undefinedValueOption: Option<never> = await Option.fromAsync(async () =>
+        await Promise.resolve(undefined)
+      );
+      expect(undefinedValueOption.isNone).toBe(true);
+      expect(() => undefinedValueOption.unwrap()).toThrow(ReferenceError);
+
+      // deno-fmt-ignore
+      const errorOption: Option<never> = await Option.fromAsync(() => { throw "Some error" });
+      expect(errorOption.isNone).toBe(true);
+      expect(() => errorOption.unwrap()).toThrow(ReferenceError);
     });
   });
 
   describe("isSome", () => {
-    it("shoudl return true when called on a Some value", () => {
-      const someValue = Option.Some(12);
-      expect(someValue.isSome).toBe(true);
+    it("shoudl return true when the Option contains a value", () => {
+      const some: Option<number> = Option.Some(12);
+      expect(some.isSome).toBe(true);
     });
 
-    it("should return false when called in a None value", () => {
-      const noneValue = Option.None();
-      expect(noneValue.isSome).toBe(false);
+    it("should return false if the Option does not contains a value", () => {
+      const none: Option<never> = Option.None();
+      expect(none.isSome).toBe(false);
     });
   });
 
   describe("isNone", () => {
-    it("should return true when called on a None value", () => {
-      const someValue = Option.None();
-      expect(someValue.isNone).toBe(true);
+    it("should return true is the Option does not contains a value", () => {
+      const none: Option<never> = Option.None();
+      expect(none.isNone).toBe(true);
     });
 
-    it("should return false when called in a Some value", () => {
-      const noneValue = Option.Some(10);
-      expect(noneValue.isNone).toBe(false);
+    it("should return false when the Option contains a value", () => {
+      const some: Option<number> = Option.Some(10);
+      expect(some.isNone).toBe(false);
     });
   });
 
   describe("expect", () => {
-    it("should not throw an error when called on a Some value", () => {
-      const someValue = Option.Some(10);
-      expect(() => someValue.expect("some")).not.toThrow();
+    it("should return the value contained by the Option", () => {
+      const some: Option<number> = Option.Some(10);
+      expect(some.expect("Expected the value 10")).toBe(10);
     });
 
-    it("should throw an error when called on a None value", () => {
-      const noneValue = Option.None();
-      expect(() => noneValue.expect("none")).toThrow();
+    it("should return the value contained by the Option and consumes the instance", () => {
+      const some: Option<number> = Option.Some(10);
+      expect(some.expect("Expected the value 10")).toBe(10);
+      expect(() => some.expect("There is no value anymore")).toThrow(ReferenceError);
+    });
+
+    it("should throw an error if the Option does not contain a value", () => {
+      const none: Option<never> = Option.None();
+
+      try {
+        none.expect("There is no value in the Option");
+      } catch (error) {
+        expect(error).toBeInstanceOf(ReferenceError);
+        expect((error as ReferenceError).message).toEqual("There is no value in the Option");
+      }
     });
   });
 
   describe("unwrap", () => {
-    it("should unwrap value and throw on second unwrap (invalidates after the fisrt access)", () => {
-      const someValue = Option.Some(10);
-      const unwrappedValue = someValue.unwrap;
-      expect(unwrappedValue).toBe(10);
-
-      const invalidatedSome = Option.Some(12);
-      expect(() => invalidatedSome.unwrap).not.toThrow();
-      expect(() => invalidatedSome.unwrap).toThrow();
+    it("should return the value contained by the Option", () => {
+      const some: Option<number> = Option.Some(10);
+      expect(some.unwrap()).toBe(10);
     });
 
-    it("should throw an error when unwrapping a None value", () => {
-      const noneValue = Option.None();
-      expect(() => noneValue.unwrap).toThrow();
+    it("should return the value contained by the Option and consumes the instance", () => {
+      const some: Option<number> = Option.Some(10);
+      expect(some.unwrap()).toBe(10);
+      expect(() => some.unwrap()).toThrow(ReferenceError);
     });
-  });
 
-  describe("unwrapOr", () => {
-    it("should unwrap value if Some, or fallback if None", () => {
-      const someValue = Option.Some(12);
-      expect(someValue.unwrapOr(30)).toBe(12);
+    it("should throw an error if the Option does not contain a value", () => {
+      const none: Option<never> = Option.None();
 
-      const noneValue = Option.None();
-      expect(noneValue.unwrapOr(30)).toBe(30);
-    });
-  });
-
-  describe("unwrapOrElse", () => {
-    it("should unwrap value if Some, or compute a fallback if None", () => {
-      const someValue = Option.Some(10);
-      expect(someValue.unwrapOrElse(() => 100)).toBe(10);
-
-      const noneValue = Option.None();
-      expect(noneValue.unwrapOrElse(() => 100)).toBe(100);
+      try {
+        none.unwrap();
+      } catch (error) {
+        expect(error).toBeInstanceOf(ReferenceError);
+        expect((error as ReferenceError).message).toEqual("Unwrap called on a None value");
+      }
     });
   });
 
   describe("map", () => {
-    it("should map the value if Some and return a new Option", () => {
-      const someValue = Option.Some(10);
-      const mappedValue = someValue.map((value) => value + 1);
-      expect(mappedValue.unwrap).toBe(11);
+    it("should create a new Option with the result of the provided function", () => {
+      const some: Option<string> = Option.Some("Hello");
+      const mapped: Option<string> = some.map((value) => value + " world!");
+      expect(mapped.unwrap()).toBe("Hello world!");
     });
 
-    it("should not map if the value is None", () => {
-      const noneValue = Option.None();
-      const noneMapped = noneValue.map((_value) => 10);
-      expect(() => noneMapped.unwrap).toThrow();
-    });
-  });
-
-  describe("mapOr", () => {
-    it("should map the value and return a new Option", () => {
-      const someValue = Option.Some(10);
-      const someMapped = someValue.mapOr(100, (value) => value + 10);
-      expect(someMapped.isSome).toBe(true);
-      expect(someMapped.unwrap).toBe(20);
-    });
-
-    it("should create an Option using the fallback", () => {
-      const noneValue = Option.None();
-      const noneMapped = noneValue.mapOr(10, (value) => value);
-      expect(noneMapped.isSome).toBe(true);
-      expect(noneMapped.unwrap).toBe(10);
-    });
-  });
-
-  describe("flatten", () => {
-    it("should recursively flatten nested Option values", () => {
-      const first = Option.Some("ok");
-      const second = Option.Some(first);
-      const nested = Option.Some(second);
-
-      const flattened = nested.flatten();
-      expect(flattened).not.toBe(nested);
-      expect(flattened.unwrap).toBe("ok");
-    });
-
-    it("should return same instance if value is not an Option", () => {
-      const noFlatten = Option.Some(10);
-      const flattened = noFlatten.flatten();
-      expect(flattened).toBe(noFlatten);
-    });
-  });
-
-  describe("peek", () => {
-    it("should return inner value without invalidating the instance", () => {
-      const someValue = Option.Some(10);
-      expect(someValue.peek).toBe(10);
-      expect(someValue.isSome).toBe(true);
-
-      const noneValue = Option.None();
-      expect(noneValue.peek).toBe(none);
-      expect(noneValue.isNone).toBe(true);
+    it("should not create a new Option if the current one does not contain a value", () => {
+      const none: Option<never> = Option.None();
+      const mapped: Option<number> = none.map((_) => 10);
+      expect(() => mapped.unwrap()).toThrow(ReferenceError);
     });
   });
 
   describe("or", () => {
-    it("should return fallback Option if original was invalidated (None)", () => {
-      const someValue = Option.Some(10);
-      someValue.unwrap; // Invalidates the Option
+    it("should return the current Option instance if it contains a value", () => {
+      const some: Option<number> = Option.Some(10);
+      const other: Option<number> = Option.Some(20);
+      expect(some.or(other)).toBe(some);
+      expect(some.or(other).unwrap()).toBe(10);
+    });
 
-      const otherValue = Option.Some(20);
-      expect(someValue.or(otherValue)).toBe(otherValue);
+    it("should return the provided fallback Option if the current instance does not contain a value", () => {
+      const none: Option<number> = Option.None();
+      const some: Option<number> = Option.Some(10);
+      expect(none.or(some)).toBe(some);
+      expect(none.or(some).unwrap()).toBe(10);
     });
   });
 });

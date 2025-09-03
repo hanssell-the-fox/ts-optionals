@@ -1,27 +1,21 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect/expect";
 import { Err, isErr, isOk, Ok } from "./result_helpers.ts";
+import type { Result } from "./result.ts";
 
 describe("Ok", () => {
   it("should create an Ok result containing a value", () => {
-    const value = Ok(10);
+    const value: Result<number, never> = Ok(10);
     expect(value.isOk).toBe(true);
-    expect(value instanceof Ok).toBe(true);
-    expect(value.unwrap).toBe(10);
-  });
-
-  it("should create and Err result when receives null/undefined", () => {
-    const value = Ok(null);
-    expect(value.isOk).toBe(false);
-    expect(() => value.unwrap).toThrow();
+    expect(value.unwrap()).toBe(10);
   });
 
   it("should return true for instanceof Ok and false for any other type ", () => {
-    const some = Ok(10);
+    const some: Result<number, never> = Ok(10);
     expect(some instanceof Ok).toBe(true);
     expect({} instanceof Ok).toBe(false);
 
-    some.unwrap; // Consumes the instance
+    some.unwrap(); // Consumes the instance
     expect(some instanceof Ok).toBe(false);
   });
 });
@@ -30,7 +24,7 @@ describe("Err", () => {
   it("should create an Err containing a cause", () => {
     const err = Err("some error");
     expect(err.isErr).toBe(true);
-    expect(err.unwrapErr).toBe("some error");
+    expect(err.unwrapErr()).toBe("some error");
   });
 
   it("should return true for instanceof Err and false for any other type ", () => {
