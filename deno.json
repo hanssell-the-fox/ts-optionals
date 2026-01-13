@@ -1,0 +1,19 @@
+{
+  "name": "@hans/ts-optionals",
+  "version": "1.0.0",
+  "exports": "./src/mod.ts",
+  "publish": {
+    "include": ["LICENSE", "README.md", "src/**/*.ts"],
+    "exclude": ["src/**/*_test.ts"]
+  },
+  "tasks": {
+    "dev": "deno check ./src",
+    "test": "deno test ./src",
+  },
+  "imports": {
+    "@std/expect": "jsr:@std/expect@^1.0.17"
+  },
+  "fmt": {
+    "lineWidth": 80
+  }
+}
