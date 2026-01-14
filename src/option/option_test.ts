@@ -1,53 +1,92 @@
-import { None, type Option, Some } from "./mod.ts";
+// option/option_test.ts
+
 import { expect, fn } from "@std/expect";
+import { describe, it } from "@std/testing/bdd";
+import { None, Option, Some } from "./mod.ts";
 
-function UNREACHABLE(): never {
-  throw "UNREACHABLE";
-}
-
-Deno.test("Option.Some", async (test) => {
-  const value = "value";
-  const option: Option<string> = Some(value);
-
-  await test.step('"isSome" should return true', () => {
+describe('"Option.Some" static factory', () => {
+  it("should create a Some variant Option containing the provided value", () => {
+    const value = "value";
+    const option: Option<string> = Option.Some(value);
     expect(option.isSome).toEqual(true);
-  });
-
-  await test.step('"isNone" should return false', () => {
-    expect(option.isSome).toEqual(true);
-  });
-
-  await test.step('"unwrap" should return the contained value', () => {
     expect(option.unwrap()).toEqual(value);
   });
 
-  await test.step('"unwrapOr" should return the contained value', () => {
-    expect(option.unwrapOr("UNREACHABLE")).toEqual(value);
+  it("should throw an error if the value is nullable", () => {
+    expect(() => Option.Some(null as unknown as string)).toThrow();
+  });
+});
+
+describe('"Option.None" static factory', () => {
+  it("should create a None variant of Option", () => {
+    const option: Option<unknown> = Option.None();
+    expect(option instanceof Option).toEqual(true);
+    expect(option.isNone).toEqual(true);
+  });
+});
+
+describe('"Option.from" static factory', () => {
+  it("should create a Some variant of Option containing the provided value", () => {
+    const value = "value";
+    const option: Option<unknown> = Option.from(value);
+    expect(option instanceof Option).toEqual(true);
+    expect(option.isSome).toEqual(true);
+    expect(option.unwrap()).toEqual(value);
   });
 
-  await test.step('"map" should', async (test) => {
-    await test.step("call the function", () => {
-      const fooFn = fn(() => "mapped") as () => string;
-      option.map(fooFn);
-      expect(fooFn).toHaveBeenCalled();
+  it("should create a None variant of Option if the value is nullable", () => {
+    const option: Option<unknown> = Option.from(null);
+    expect(option instanceof Option).toEqual(true);
+    expect(option.isNone).toEqual(true);
+  });
+});
+
+describe("Some variant of Option", () => {
+  const value = "value";
+  const option: Option<string> = Some(value);
+
+  describe('"isSome" should return true', () => {
+    expect(option.isSome).toEqual(true);
+  });
+
+  describe('"isNone" should return false', () => {
+    expect(option.isSome).toEqual(true);
+  });
+
+  describe('"unwrap" should return the contained value', () => {
+    const returned: unknown = option.unwrap();
+    expect(returned).toEqual(value);
+  });
+
+  describe('"unwrapOr" should return the contained value', () => {
+    const returned: unknown = option.unwrapOr("UNREACHABLE");
+    expect(returned).toEqual(value);
+  });
+
+  describe('"map"', () => {
+    it("should call the function with the contained value", () => {
+      const mapFn = fn(() => "foo") as () => string;
+      option.map(mapFn);
+      expect(mapFn).toHaveBeenCalled();
+      expect(mapFn).toHaveBeenCalledWith(value);
     });
 
-    await test.step("pass the contained value", () => {
-      const fooFn = fn(() => "mapped") as () => string;
-      option.map(fooFn);
-      expect(fooFn).toHaveBeenCalledWith(value);
-    });
-
-    await test.step("return Some with the result", () => {
+    it("should return a new Some containing the result of the function", () => {
       const newValue = "mapped";
-      const mapped: Option<string> = option.map(() => newValue);
-      expect(mapped.isSome).toEqual(true);
-      expect(mapped.unwrap()).toEqual(newValue);
+      const result: Option<string> = option.map(() => newValue);
+      expect(result instanceof Option).toEqual(true);
+      expect(result.isSome).toEqual(true);
+      expect(result.unwrap()).toEqual(newValue);
+    });
+
+    it("should throw an error if the function result is nullable", () => {
+      const mapFn = fn(() => null) as () => string;
+      expect(() => option.map(mapFn)).toThrow();
     });
   });
 
-  await test.step('"match" should', async (test) => {
-    await test.step("execute the Some handler", () => {
+  describe('"match"', () => {
+    it("should execute the Some handler with the contained value", () => {
       const handler = fn() as () => undefined;
 
       option.match({
@@ -56,67 +95,58 @@ Deno.test("Option.Some", async (test) => {
       });
 
       expect(handler).toHaveBeenCalled();
-    });
-
-    await test.step("pass the contained value", () => {
-      const handler = fn() as () => undefined;
-
-      option.match({
-        Some: handler,
-        None: UNREACHABLE,
-      });
-
       expect(handler).toHaveBeenCalledWith(value);
     });
 
-    await test.step("return the value from the handler", () => {
-      const returnedValue = "a result value";
+    it("should return the result of the handler", () => {
+      const returned = "result";
 
       const result = option.match({
-        Some: () => returnedValue,
+        Some: () => returned,
         None: UNREACHABLE,
       });
 
-      expect(result).toEqual(returnedValue);
+      expect(result).toEqual(returned);
     });
   });
 });
 
-Deno.test("Option.None", async (test) => {
+describe("None variant of Option", () => {
   const option: Option<string> = None;
 
-  await test.step('"isNone" should return true', () => {
-    expect(option.isNone).toEqual(true);
-  });
-
-  await test.step('"isSome" should return false', () => {
+  describe('"isSome" should return false', () => {
     expect(option.isSome).toEqual(false);
   });
 
-  await test.step('"unwrap" should throw an error', () => {
+  describe('"isNone" should return true', () => {
+    expect(option.isNone).toEqual(true);
+  });
+
+  describe('"unwrap" should throw an error', () => {
     expect(() => option.unwrap()).toThrow();
   });
 
-  await test.step('"unwrapOr" should return the default value', () => {
+  describe('"unwrapOr" should return the default value', () => {
     const defaultValue = "default";
-    expect(option.unwrapOr(defaultValue)).toEqual(defaultValue);
+    const returned: unknown = option.unwrapOr(defaultValue);
+    expect(returned).toEqual(defaultValue);
   });
 
-  await test.step('"map" should', async (test) => {
-    await test.step("return the current None", () => {
-      const mapped = option.map(UNREACHABLE);
-      expect(mapped).toEqual(option);
-    });
-
-    await test.step("not execute the function", () => {
-      const mapFn = fn() as () => string;
+  describe('"map"', () => {
+    it("should not execute the function", () => {
+      const mapFn = fn(() => "foo") as () => string;
       option.map(mapFn);
       expect(mapFn).not.toHaveBeenCalled();
     });
+
+    it("should return the current instance of None", () => {
+      const mapped: unknown = option.map(UNREACHABLE);
+      expect(mapped).toEqual(option);
+    });
   });
 
-  await test.step('"match" should', async (test) => {
-    await test.step("execute the None handler", () => {
+  describe('"match"', () => {
+    it("should execute the None handler", () => {
       const handler = fn() as () => string;
 
       option.match({
@@ -127,15 +157,19 @@ Deno.test("Option.None", async (test) => {
       expect(handler).toHaveBeenCalled();
     });
 
-    await test.step("return the value from the handler", () => {
-      const returnedValue = "foo";
+    it("should return the result of the handler", () => {
+      const returned = "foo";
 
       const result = option.match({
-        None: () => returnedValue,
+        None: () => returned,
         Some: UNREACHABLE,
       });
 
-      expect(result).toEqual(returnedValue);
+      expect(result).toEqual(returned);
     });
   });
 });
+
+function UNREACHABLE(): never {
+  throw "UNREACHABLE";
+}

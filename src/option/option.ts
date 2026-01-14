@@ -1,5 +1,8 @@
 // option/option.ts
 
+import { isNullable } from "../utils/mod.ts";
+import type { NonNullable, Nullable } from "../types.ts";
+
 /**
  * Represents an optional value.
  *
@@ -16,10 +19,17 @@ export class Option<T> {
   /**
    * Creates an `Option` that contains a value.
    *
+   * @throws {TypeError} If (somehow) the value was `null` or `undefined`.
    * @param value - The value for the `Option`.
    * @returns A `Some` variant of `Option`.
    */
-  public static Some<T>(value: T): Option<T> {
+  public static Some<T = never>(value: NonNullable<T>): Option<NonNullable<T>> {
+    // Verifying if no `null` or `undefined` manage to sneak in...since there's a way to "trick" the TypeScript type
+    // checker and we need to guarantee safety at runtime.
+    if (isNullable(value)) {
+      throw new TypeError("Cannot create an Option containing a nullable value");
+    }
+
     return new Option(new Some(value));
   }
 
@@ -30,6 +40,20 @@ export class Option<T> {
    */
   public static None(): Option<never> {
     return new Option(new None());
+  }
+
+  /**
+   * Converts a "possible null" value into it's `Option` representation, which can be `Some` or `None`.
+   *
+   * - `Some` if the value isn't `null` or `undefined`.
+   * - `None` otherwise.
+   *
+   * @param value - A value that can be `null` or `undefined`.
+   * @returned `Some` containing the value or `None` if it's nullable.
+   */
+  public static from<T = never>(value: Nullable<T>): Option<NonNullable<T>> {
+    if (isNullable(value)) return Option.None();
+    return Option.Some(value as NonNullable<T>);
   }
 
   /**
@@ -79,8 +103,8 @@ export class Option<T> {
    * @param fn - Function that transforms the value.
    * @returns A new `Some` with the transformed value.
    */
-  public map<U>(fn: (value: T) => U): Option<U> {
-    if (this.isNone) return this as unknown as Option<U>;
+  public map<U = never>(fn: (value: T) => NonNullable<U>): Option<NonNullable<U>> {
+    if (this.isNone) return this as unknown as Option<NonNullable<U>>;
     return Option.Some(fn(this.unwrap()));
   }
 
