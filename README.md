@@ -68,3 +68,12 @@ const username: string = await fetchUser("123").match({
 });
 ```
 
+#### Changes 
+
+#### v1.1.0 
+
+- Added `isNullable` as utility function.
+- Added type `NonNullable<T>`.
+- Added type `Nullable<T>`.
+- Added type `Generic<T>`.
+- Changed `Option` to only accepts non-nullable values as a valid `Some`.
