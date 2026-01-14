@@ -3,3 +3,6 @@
 export * from "./option/mod.ts";
 export * from "./result/mod.ts";
 export * from "./either/mod.ts";
+
+export * from "./utils/mod.ts";
+export * from "./types.ts";
