@@ -70,10 +70,18 @@ const username: string = await fetchUser("123").match({
 
 #### Changes 
 
+Latest changes
+
 #### v1.1.0 
 
-- Added `isNullable` as utility function.
-- Added type `NonNullable<T>`.
+**NOTABLE**: `Option`, `Result` and `Either` where reworked to only accept values
+that aren't `null` or `undefined`, since `None` should be used to represent
+the absence of value.
+
 - Added type `Nullable<T>`.
+- Added type `NonNullable<T>`.
 - Added type `Generic<T>`.
-- Changed `Option` to only accepts non-nullable values as a valid `Some`.
+- Added `isNullable` as utility function.
+- Changed `Option` to only accept non-nullable values as a valid `Some`.
+- Changed `Result` to only accept non-nullable values.
+- Changed `Either` to only accept non-nullable values.
